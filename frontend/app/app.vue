@@ -6,8 +6,8 @@
 
     <header class="app-header">
       <div class="header-content">
-        <h1 class="brand-title">Aetheria</h1>
-        <p class="brand-subtitle">Premium Product Catalog & Management System</p>
+        <h1 class="brand-title">VapeCloud Indo</h1>
+        <p class="brand-subtitle">Premium Indonesian Vapestore & Liquid Catalog</p>
       </div>
       <button class="btn btn-primary btn-add" @click="openAddModal">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
@@ -72,7 +72,7 @@
             <p class="product-description">{{ truncateText(product.description, 120) }}</p>
           </div>
           <div class="card-footer">
-            <span class="product-price">${{ formatPrice(product.price) }}</span>
+            <span class="product-price">Rp {{ formatPrice(product.price) }}</span>
             <button class="btn btn-details" @click.stop="openDetailModal(product)">
               <span>View Details</span>
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
@@ -141,7 +141,7 @@
                   id="product-name"
                   type="text" 
                   v-model="newProduct.name" 
-                  placeholder="e.g. Mechanical Keyboard G-800" 
+                  placeholder="e.g. Liquid Oat Drip V1 60ml" 
                   class="form-control"
                   :class="{ 'is-invalid': formErrors.name }"
                 />
@@ -149,13 +149,12 @@
               </div>
 
               <div class="form-group">
-                <label for="product-price">Price ($ USD)</label>
+                <label for="product-price">Price (Rupiah Rp)</label>
                 <input 
                   id="product-price"
                   type="number" 
-                  step="0.01"
                   v-model.number="newProduct.price" 
-                  placeholder="0.00" 
+                  placeholder="e.g. 150000" 
                   class="form-control"
                   :class="{ 'is-invalid': formErrors.price }"
                 />
@@ -168,7 +167,7 @@
                   id="product-desc"
                   rows="4" 
                   v-model="newProduct.description" 
-                  placeholder="Describe the product features, specifications, and materials..." 
+                  placeholder="Describe taste profile, PG/VG ratio, nicotine strength, or mod specifications..." 
                   class="form-control text-area"
                   :class="{ 'is-invalid': formErrors.description }"
                 ></textarea>
@@ -202,7 +201,7 @@
 
             <div class="modal-body detail-body">
               <h2 class="detail-name">{{ selectedProduct.name }}</h2>
-              <div class="detail-price-badge">${{ formatPrice(selectedProduct.price) }}</div>
+              <div class="detail-price-badge">Rp {{ formatPrice(selectedProduct.price) }}</div>
               
               <div class="detail-section">
                 <h4 class="section-label">Description</h4>
@@ -304,7 +303,7 @@ const fetchProducts = async () => {
   } catch (err) {
     console.error(err)
     showToast('Failed to load products from API server', 'error')
-  } finally {
+  } fill/y {
     isLoading.value = false
   }
 }
@@ -335,7 +334,11 @@ const truncateText = (text, maxLength) => {
 
 const formatPrice = (price) => {
   const parsed = parseFloat(price)
-  return isNaN(parsed) ? '0.00' : parsed.toFixed(2)
+  if (isNaN(parsed)) return '0'
+  return new Intl.NumberFormat('id-ID', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(parsed)
 }
 
 const formatDate = (dateString) => {
