@@ -22,7 +22,8 @@ class ProductsTable
                 TextColumn::make('name')
                     ->searchable(),
                 TextColumn::make('price')
-                    ->money()
+                    ->prefix('Rp ')
+                    ->numeric(0, locale: 'id')
                     ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()
@@ -36,8 +37,8 @@ class ProductsTable
             ->filters([
                 Filter::make('price')
                     ->form([
-                        TextInput::make('min_price')->numeric()->label('Harga Min'),
-                        TextInput::make('max_price')->numeric()->label('Harga Max'),
+                        TextInput::make('min_price')->numeric()->prefix('Rp')->label('Harga Min (Rp)'),
+                        TextInput::make('max_price')->numeric()->prefix('Rp')->label('Harga Max (Rp)'),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
