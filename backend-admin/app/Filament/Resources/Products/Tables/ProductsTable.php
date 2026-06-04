@@ -7,6 +7,9 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Tables\Filters\Filter;
+use Filament\Forms\Components\TextInput;
+use Illuminate\Database\Eloquent\Builder;
 
 class ProductsTable
 {
@@ -31,7 +34,22 @@ class ProductsTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Filter::make('price')
+                    ->form([
+                        TextInput::make('min_price')->numeric()->label('Harga Min'),
+                        TextInput::make('max_price')->numeric()->label('Harga Max'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['min_price'],
+                                fn (Builder $query, $price): Builder => $query->where('price', '>=', $price),
+                            )
+                            ->when(
+                                $data['max_price'],
+                                fn (Builder $query, $price): Builder => $query->where('price', '<=', $price),
+                            );
+                    })
             ])
             ->recordActions([
                 EditAction::make(),
