@@ -1,21 +1,30 @@
 <template>
   <div class="app-container">
-    <!-- Ambient Background Glows -->
-    <div class="glow-bg-1"></div>
-    <div class="glow-bg-2"></div>
-
+    <!-- Global Header -->
     <header class="app-header">
-      <div class="header-content">
-        <h1 class="brand-title">VapeCloud Indo</h1>
-        <p class="brand-subtitle">Premium Indonesian Vapestore & Liquid Catalog</p>
+      <div class="header-main">
+        <div class="brand-group">
+          <span class="brand-logo"></span>
+          <h1 class="brand-title">VapeCloud Indo.</h1>
+        </div>
+        <p class="brand-subtitle">Designed for the finest vapor experience.</p>
       </div>
       <button class="btn btn-primary btn-add" @click="openAddModal">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
         <span>Add Product</span>
       </button>
     </header>
 
-    <!-- Controls (Search) -->
+    <!-- Hero Section / Promo Banner -->
+    <section class="hero-banner">
+      <div class="hero-content">
+        <span class="badge-promo">New Collection</span>
+        <h2 class="hero-headline">The Liquid & Mod Catalog.</h2>
+        <p class="hero-subheadline">Browse and manage premium local and imported collections with enterprise-level simplicity.</p>
+      </div>
+    </section>
+
+    <!-- Controls & Search -->
     <section class="controls-section">
       <div class="search-wrapper">
         <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
@@ -23,86 +32,105 @@
           id="search-input"
           type="text" 
           v-model="searchQuery" 
-          placeholder="Search products by name or description..." 
+          placeholder="Search collections (e.g. Liquid, Mod, RDA)..." 
           class="search-input"
           autocomplete="off"
         />
         <button v-if="searchQuery" class="clear-search-btn" @click="searchQuery = ''">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
       </div>
     </section>
 
-    <!-- Product Grid & Loading States -->
+    <!-- Catalog Section -->
     <main class="catalog-section">
-      <!-- Loading Skeleton Grid -->
+      <!-- Loading skeleton grid -->
       <div v-if="isLoading" class="product-grid">
         <div v-for="n in 8" :key="'skeleton-' + n" class="product-card skeleton-card">
-          <div class="skeleton skeleton-title"></div>
-          <div class="skeleton skeleton-text-1"></div>
-          <div class="skeleton skeleton-text-2"></div>
-          <div class="card-footer">
+          <div class="skeleton skeleton-image"></div>
+          <div class="card-info">
+            <div class="skeleton skeleton-title"></div>
+            <div class="skeleton skeleton-text"></div>
             <div class="skeleton skeleton-price"></div>
-            <div class="skeleton skeleton-btn"></div>
           </div>
         </div>
       </div>
 
       <!-- Empty State -->
       <div v-else-if="products.length === 0" class="empty-state-card">
-        <div class="empty-icon-wrapper">
-          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-        </div>
+        <div class="empty-icon"></div>
         <h3>No Products Found</h3>
-        <p>We couldn't find any products matching your search term or catalog database is empty.</p>
-        <button v-if="searchQuery" class="btn btn-secondary" @click="searchQuery = ''">Clear Search</button>
-        <button v-else class="btn btn-primary" @click="openAddModal">Add Your First Product</button>
+        <p>No collections match your criteria. Try adjusting your query or insert a new product entry.</p>
+        <div class="empty-actions">
+          <button v-if="searchQuery" class="btn btn-secondary" @click="searchQuery = ''">Clear Search</button>
+          <button class="btn btn-primary" @click="openAddModal">Add Product</button>
+        </div>
       </div>
 
-      <!-- Active Grid -->
+      <!-- Active Bento-style Catalog Grid -->
       <div v-else class="product-grid">
         <div 
-          v-for="product in products" 
+          v-for="(product, idx) in products" 
           :key="product.id" 
           class="product-card"
+          :class="{ 'card-highlight': idx % 5 === 0 }"
           @click="openDetailModal(product)"
         >
-          <div class="card-body">
-            <h3 class="product-name">{{ product.name }}</h3>
-            <p class="product-description">{{ truncateText(product.description, 120) }}</p>
+          <!-- Beautiful abstract line-art visual placeholder -->
+          <div class="product-image-container">
+            <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="geometric-pattern">
+              <defs>
+                <linearGradient :id="'gradient-' + product.id" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" :stop-color="getPatternColors(idx).start" />
+                  <stop offset="100%" :stop-color="getPatternColors(idx).end" />
+                </linearGradient>
+              </defs>
+              <rect width="100" height="100" :fill="'url(#gradient-' + product.id + ')'" />
+              <!-- Abstract circular layouts -->
+              <circle cx="50" cy="50" :r="20 + (idx % 3) * 6" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" />
+              <circle cx="50" cy="50" :r="10 + (idx % 3) * 4" stroke="rgba(255,255,255,0.25)" stroke-width="1" stroke-dasharray="3 3" />
+              <path d="M50 30L55 45H70L58 53L62 68L50 58L38 68L42 53L30 45H45L50 30Z" fill="rgba(255,255,255,0.06)" />
+            </svg>
+            <span class="category-tag">Premium</span>
           </div>
-          <div class="card-footer">
-            <span class="product-price">Rp {{ formatPrice(product.price) }}</span>
-            <button class="btn btn-details" @click.stop="openDetailModal(product)">
-              <span>View Details</span>
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-            </button>
+
+          <div class="card-info">
+            <h3 class="product-name">{{ product.name }}</h3>
+            <p class="product-description">{{ truncateText(product.description, 85) }}</p>
+            
+            <div class="card-footer">
+              <span class="product-price">Rp {{ formatPrice(product.price) }}</span>
+              <button class="btn btn-link" @click.stop="openDetailModal(product)">
+                <span>Learn more</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </main>
 
-    <!-- Pagination Controls -->
+    <!-- Pagination -->
     <footer v-if="!isLoading && products.length > 0" class="pagination-section">
-      <div class="pagination-info">
-        Showing Page <span class="highlight">{{ currentPage }}</span> of <span class="highlight">{{ totalPages }}</span> ({{ totalProducts }} total products)
-      </div>
-      <div class="pagination-controls">
+      <span class="pagination-summary">
+        Showing page <strong>{{ currentPage }}</strong> of {{ totalPages }} ({{ totalProducts }} total items)
+      </span>
+      <div class="pagination-actions">
         <button 
           id="prev-page-btn"
-          class="btn btn-pagination" 
+          class="btn btn-secondary btn-pagination" 
           :disabled="currentPage === 1" 
           @click="currentPage--"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-          <span>Prev</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          <span>Back</span>
         </button>
 
-        <div class="page-numbers">
+        <div class="page-indices">
           <button 
             v-for="page in totalPages" 
             :key="page" 
-            class="page-number-btn"
+            class="page-index-btn"
             :class="{ active: page === currentPage }"
             @click="currentPage = page"
           >
@@ -112,12 +140,12 @@
 
         <button 
           id="next-page-btn"
-          class="btn btn-pagination" 
+          class="btn btn-secondary btn-pagination" 
           :disabled="currentPage === totalPages" 
           @click="currentPage++"
         >
           <span>Next</span>
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
         </button>
       </div>
     </footer>
@@ -125,16 +153,16 @@
     <!-- ADD PRODUCT MODAL -->
     <Transition name="fade">
       <div v-if="showAddModal" class="modal-overlay" @click.self="closeAddModal">
-        <Transition name="zoom">
-          <div class="modal-content glass-panel" role="dialog" aria-modal="true">
+        <Transition name="slide-up">
+          <div class="modal-card" role="dialog" aria-modal="true">
             <header class="modal-header">
-              <h3>Create New Product</h3>
-              <button class="close-modal-btn" @click="closeAddModal">
+              <h3 class="modal-title">New Product Spec</h3>
+              <button class="btn-close" @click="closeAddModal">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
               </button>
             </header>
 
-            <form class="modal-form" @submit.prevent="submitProduct">
+            <form class="modal-body form-layout" @submit.prevent="submitProduct">
               <div class="form-group">
                 <label for="product-name">Product Name</label>
                 <input 
@@ -145,20 +173,23 @@
                   class="form-control"
                   :class="{ 'is-invalid': formErrors.name }"
                 />
-                <span v-if="formErrors.name" class="error-msg">{{ formErrors.name }}</span>
+                <span v-if="formErrors.name" class="error-text">{{ formErrors.name }}</span>
               </div>
 
               <div class="form-group">
                 <label for="product-price">Price (Rupiah Rp)</label>
-                <input 
-                  id="product-price"
-                  type="number" 
-                  v-model.number="newProduct.price" 
-                  placeholder="e.g. 150000" 
-                  class="form-control"
-                  :class="{ 'is-invalid': formErrors.price }"
-                />
-                <span v-if="formErrors.price" class="error-msg">{{ formErrors.price }}</span>
+                <div class="price-input-wrapper">
+                  <span class="currency-prefix">Rp</span>
+                  <input 
+                    id="product-price"
+                    type="number" 
+                    v-model.number="newProduct.price" 
+                    placeholder="150000" 
+                    class="form-control input-price"
+                    :class="{ 'is-invalid': formErrors.price }"
+                  />
+                </div>
+                <span v-if="formErrors.price" class="error-text">{{ formErrors.price }}</span>
               </div>
 
               <div class="form-group">
@@ -171,14 +202,14 @@
                   class="form-control text-area"
                   :class="{ 'is-invalid': formErrors.description }"
                 ></textarea>
-                <span v-if="formErrors.description" class="error-msg">{{ formErrors.description }}</span>
+                <span v-if="formErrors.description" class="error-text">{{ formErrors.description }}</span>
               </div>
 
-              <div class="modal-actions">
+              <div class="form-actions">
                 <button type="button" class="btn btn-secondary" @click="closeAddModal">Cancel</button>
                 <button type="submit" class="btn btn-primary" :disabled="isSubmitting">
                   <span v-if="isSubmitting" class="spinner"></span>
-                  <span>{{ isSubmitting ? 'Creating...' : 'Create Product' }}</span>
+                  <span>{{ isSubmitting ? 'Adding...' : 'Add to Catalog' }}</span>
                 </button>
               </div>
             </form>
@@ -190,55 +221,81 @@
     <!-- PRODUCT DETAIL MODAL -->
     <Transition name="fade">
       <div v-if="showDetailModal && selectedProduct" class="modal-overlay" @click.self="closeDetailModal">
-        <Transition name="zoom">
-          <div class="modal-content detail-modal glass-panel" role="dialog" aria-modal="true">
+        <Transition name="slide-up">
+          <div class="modal-card detail-card" role="dialog" aria-modal="true">
             <header class="modal-header">
-              <h3>Product Specifications</h3>
-              <button class="close-modal-btn" @click="closeDetailModal">
+              <span class="modal-subtitle-tag">Specifications</span>
+              <button class="btn-close" @click="closeDetailModal">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
               </button>
             </header>
 
-            <div class="modal-body detail-body">
-              <h2 class="detail-name">{{ selectedProduct.name }}</h2>
-              <div class="detail-price-badge">Rp {{ formatPrice(selectedProduct.price) }}</div>
-              
-              <div class="detail-section">
-                <h4 class="section-label">Description</h4>
-                <p class="detail-desc-text">{{ selectedProduct.description }}</p>
+            <div class="modal-body detail-grid">
+              <!-- Left Column: Premium Preview Pattern -->
+              <div class="detail-preview-panel">
+                <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="geometric-pattern">
+                  <defs>
+                    <linearGradient id="detail-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#0F172A" />
+                      <stop offset="100%" stop-color="#334155" />
+                    </linearGradient>
+                  </defs>
+                  <rect width="100" height="100" fill="url(#detail-gradient)" />
+                  <circle cx="50" cy="50" r="32" stroke="rgba(255,255,255,0.08)" stroke-width="2" />
+                  <circle cx="50" cy="50" r="22" stroke="rgba(255,255,255,0.12)" stroke-width="1" stroke-dasharray="4 4" />
+                  <circle cx="50" cy="50" r="12" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" />
+                </svg>
+                <div class="detail-preview-badge">VapeCloud Premium</div>
               </div>
 
-              <div class="detail-metadata">
-                <div class="meta-item">
-                  <span class="meta-label">Product ID (UUID)</span>
-                  <code class="meta-val">{{ selectedProduct.id }}</code>
+              <!-- Right Column: Product Info -->
+              <div class="detail-info-panel">
+                <h2 class="detail-title">{{ selectedProduct.name }}</h2>
+                <div class="detail-price-section">
+                  <span class="detail-price-label">Price</span>
+                  <span class="detail-price-value">Rp {{ formatPrice(selectedProduct.price) }}</span>
                 </div>
-                <div class="meta-item" v-if="selectedProduct.createdAt">
-                  <span class="meta-label">Date Added</span>
-                  <span class="meta-val">{{ formatDate(selectedProduct.createdAt) }}</span>
+
+                <div class="detail-description-section">
+                  <h4>Description</h4>
+                  <p>{{ selectedProduct.description }}</p>
+                </div>
+
+                <div class="detail-meta-table">
+                  <div class="meta-row">
+                    <span class="meta-col-label">Product ID</span>
+                    <span class="meta-col-value font-mono">{{ selectedProduct.id }}</span>
+                  </div>
+                  <div class="meta-row" v-if="selectedProduct.createdAt">
+                    <span class="meta-col-label">Date Added</span>
+                    <span class="meta-col-value">{{ formatDate(selectedProduct.createdAt) }}</span>
+                  </div>
+                  <div class="meta-row">
+                    <span class="meta-col-label">Status</span>
+                    <span class="meta-col-value text-success">Active / Available</span>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <footer class="modal-footer detail-footer">
-              <button class="btn btn-secondary" @click="closeDetailModal">Close Detail</button>
+            <footer class="modal-footer">
+              <button class="btn btn-secondary btn-full" @click="closeDetailModal">Close Specifications</button>
             </footer>
           </div>
         </Transition>
       </div>
     </Transition>
 
-    <!-- TOAST NOTIFICATIONS -->
-    <div class="toasts-wrapper">
-      <TransitionGroup name="slide">
+    <!-- TOASTS -->
+    <div class="toast-container">
+      <TransitionGroup name="toast-slide">
         <div 
           v-for="toast in toasts" 
           :key="toast.id" 
           class="toast-alert" 
           :class="toast.type"
         >
-          <svg v-if="toast.type === 'success'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-          <svg v-else xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          <span class="toast-dot"></span>
           <span>{{ toast.message }}</span>
         </div>
       </TransitionGroup>
@@ -275,14 +332,26 @@ const formErrors = ref({
 const selectedProduct = ref(null)
 const showDetailModal = ref(false)
 
-// Toast State
+// Toast notifications
 const toasts = ref([])
 const showToast = (message, type = 'success') => {
   const id = Date.now()
   toasts.value.push({ id, message, type })
   setTimeout(() => {
     toasts.value = toasts.value.filter(t => t.id !== id)
-  }, 4000)
+  }, 3500)
+}
+
+// Color patterns for premium cards
+const getPatternColors = (idx) => {
+  const gradients = [
+    { start: '#3B82F6', end: '#1D4ED8' }, // Blue
+    { start: '#10B981', end: '#047857' }, // Emerald
+    { start: '#8B5CF6', end: '#6D28D9' }, // Violet
+    { start: '#EF4444', end: '#B91C1C' }, // Rose
+    { start: '#F59E0B', end: '#B45309' }  // Amber
+  ]
+  return gradients[idx % gradients.length]
 }
 
 // Fetch Catalog Products
@@ -302,13 +371,13 @@ const fetchProducts = async () => {
     totalPages.value = res.meta.totalPages
   } catch (err) {
     console.error(err)
-    showToast('Failed to load products from API server', 'error')
+    showToast('Failed to connect to backend product service', 'error')
   } finally {
-    isLoading.value = false;
+    isLoading.value = false
   }
 }
 
-// Search with dynamic input debouncing
+// Debounced input search
 let searchTimeout
 watch(searchQuery, () => {
   clearTimeout(searchTimeout)
@@ -326,7 +395,7 @@ onMounted(() => {
   fetchProducts()
 })
 
-// Helpers & Formatters
+// Helpers
 const truncateText = (text, maxLength) => {
   if (!text) return ''
   return text.length > maxLength ? text.substring(0, maxLength) + '...' : text
@@ -346,14 +415,12 @@ const formatDate = (dateString) => {
   const date = new Date(dateString)
   return date.toLocaleDateString('en-US', {
     year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
+    month: 'long',
+    day: 'numeric'
   })
 }
 
-// Modal Handlers
+// Modal actions
 const openDetailModal = (product) => {
   selectedProduct.value = product
   showDetailModal.value = true
@@ -418,13 +485,13 @@ const submitProduct = async () => {
         price: parseFloat(newProduct.value.price)
       }
     })
-    showToast('Product successfully added to catalog!')
+    showToast('Product added to catalog successfully')
     closeAddModal()
     currentPage.value = 1
     fetchProducts()
   } catch (err) {
     console.error(err)
-    const errorMsg = err.data?.message || 'Failed to add product to catalog'
+    const errorMsg = err.data?.message || 'Failed to insert product record'
     showToast(Array.isArray(errorMsg) ? errorMsg.join(', ') : errorMsg, 'error')
   } finally {
     isSubmitting.value = false
@@ -433,33 +500,31 @@ const submitProduct = async () => {
 </script>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-/* Dynamic Reset & Design tokens */
+/* Color tokens: Apple / Stripe / Vercel style */
 :root {
-  --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   
-  /* Color Palette (Deep Space Theme) */
-  --bg-primary: #080b11;
-  --bg-secondary: #111622;
-  --accent-cyan: #00f2fe;
-  --accent-purple: #9b51e0;
-  --text-main: #f3f4f6;
-  --text-muted: #9ca3af;
-  --border-color: rgba(255, 255, 255, 0.08);
-  --border-hover: rgba(0, 242, 254, 0.4);
+  --bg-color: #FAFAFA;
+  --surface-color: #FFFFFF;
+  --primary-color: #2563EB;
+  --primary-hover: #1D4ED8;
+  --text-primary: #0F172A;
+  --text-secondary: #64748B;
+  --border-color: #E2E8F0;
   
-  /* Glassmorphism tokens */
-  --glass-bg: rgba(17, 22, 34, 0.65);
-  --glass-blur: blur(16px);
-  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-
-  /* Utilities */
-  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.04), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+  --shadow-card: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+  
+  --transition-smooth: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   --radius-lg: 16px;
   --radius-md: 10px;
 }
 
+/* Global Reset */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -467,78 +532,113 @@ const submitProduct = async () => {
 }
 
 body {
-  background-color: var(--bg-primary);
-  color: var(--text-main);
+  background-color: var(--bg-color);
+  color: var(--text-primary);
   font-family: var(--font-sans);
-  overflow-x: hidden;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
-/* Ambient glows */
-.glow-bg-1, .glow-bg-2 {
-  position: fixed;
-  width: 50vw;
-  height: 50vw;
-  border-radius: 50%;
-  pointer-events: none;
-  filter: blur(150px);
-  opacity: 0.15;
-  z-index: 0;
-}
-
-.glow-bg-1 {
-  background: radial-gradient(circle, var(--accent-cyan) 0%, transparent 70%);
-  top: -10vw;
-  left: -10vw;
-}
-
-.glow-bg-2 {
-  background: radial-gradient(circle, var(--accent-purple) 0%, transparent 70%);
-  bottom: -10vw;
-  right: -10vw;
-}
-
-/* Main Container Layout */
+/* Container */
 .app-container {
-  position: relative;
-  z-index: 1;
-  max-width: 1200px;
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 40px 20px;
+  padding: 40px 24px;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
-/* Header styling */
+/* Apple-style Header */
 .app-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border-color);
   margin-bottom: 40px;
   gap: 20px;
 }
 
+.brand-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand-logo {
+  font-size: 1.8rem;
+  color: var(--text-primary);
+  user-select: none;
+}
+
 .brand-title {
-  font-size: 2.5rem;
+  font-size: 1.6rem;
   font-weight: 700;
-  letter-spacing: -0.05em;
-  background: linear-gradient(135deg, var(--text-main) 30%, var(--accent-cyan) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin-bottom: 4px;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
 }
 
 .brand-subtitle {
-  color: var(--text-muted);
-  font-size: 0.95rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
   font-weight: 400;
+  margin-top: 2px;
 }
 
-/* Control bar styling */
+/* Apple Store Inspired Hero banner */
+.hero-banner {
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 48px;
+  margin-bottom: 40px;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-banner::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 40%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(37,99,235,0.03) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.badge-promo {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--primary-color);
+  margin-bottom: 12px;
+}
+
+.hero-headline {
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.hero-subheadline {
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+  max-width: 600px;
+  line-height: 1.6;
+}
+
+/* Controls (Search Bar) */
 .controls-section {
-  margin-bottom: 30px;
+  margin-bottom: 32px;
 }
 
 .search-wrapper {
@@ -546,22 +646,21 @@ body {
   width: 100%;
   display: flex;
   align-items: center;
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
+  background: var(--surface-color);
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   padding: 4px 16px;
-  box-shadow: var(--glass-shadow);
+  box-shadow: var(--shadow-sm);
   transition: var(--transition-smooth);
 }
 
 .search-wrapper:focus-within {
-  border-color: var(--border-hover);
-  box-shadow: 0 0 20px rgba(0, 242, 254, 0.15), var(--glass-shadow);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .search-icon {
-  color: var(--text-muted);
+  color: var(--text-secondary);
   margin-right: 12px;
   flex-shrink: 0;
 }
@@ -571,135 +670,172 @@ body {
   background: transparent;
   border: none;
   outline: none;
-  color: var(--text-main);
+  color: var(--text-primary);
   font-family: var(--font-sans);
-  font-size: 1.05rem;
-  padding: 12px 0;
+  font-size: 1rem;
+  padding: 14px 0;
 }
 
 .search-input::placeholder {
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .clear-search-btn {
   background: transparent;
   border: none;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   cursor: pointer;
-  padding: 8px;
+  padding: 6px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
   transition: var(--transition-smooth);
 }
 
 .clear-search-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--text-main);
+  background: #F1F5F9;
+  color: var(--text-primary);
 }
 
-/* Product Catalog Grid */
+/* Catalog Section */
 .catalog-section {
   flex-grow: 1;
-  margin-bottom: 40px;
+  margin-bottom: 48px;
 }
 
+/* Grid Layout: Premium Bento inspired grid */
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 32px;
 }
 
-/* Product Card Glassmorphism Design */
+/* Product Card */
 .product-card {
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
+  background: var(--surface-color);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
-  padding: 24px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  min-height: 230px;
-  box-shadow: var(--glass-shadow);
   cursor: pointer;
-  transition: var(--transition-smooth);
-  position: relative;
-  overflow: hidden;
-}
-
-.product-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, rgba(0, 242, 254, 0.05) 0%, rgba(155, 81, 224, 0.05) 100%);
-  opacity: 0;
   transition: var(--transition-smooth);
 }
 
 .product-card:hover {
-  transform: translateY(-6px);
-  border-color: var(--border-hover);
-  box-shadow: 0 12px 30px rgba(0, 242, 254, 0.08), var(--glass-shadow);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: #CBD5E1;
 }
 
-.product-card:hover::before {
-  opacity: 1;
+/* Bento highlight rules */
+.product-grid .card-highlight {
+  grid-column: span 1;
 }
 
-.card-body {
+@media (min-width: 1024px) {
+  .product-grid .card-highlight {
+    grid-column: span 2;
+    flex-direction: row;
+  }
+  .product-grid .card-highlight .product-image-container {
+    width: 45%;
+    height: 100%;
+    min-height: 280px;
+  }
+  .product-grid .card-highlight .card-info {
+    width: 55%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 32px;
+  }
+}
+
+.product-image-container {
+  height: 180px;
+  width: 100%;
   position: relative;
-  z-index: 1;
-  margin-bottom: 20px;
+  overflow: hidden;
+  background-color: #F1F5F9;
+}
+
+.geometric-pattern {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: var(--transition-smooth);
+}
+
+.product-card:hover .geometric-pattern {
+  transform: scale(1.05);
+}
+
+.category-tag {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(4px);
+  color: var(--text-primary);
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.02em;
+  box-shadow: var(--shadow-sm);
+}
+
+.card-info {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
 }
 
 .product-name {
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   font-weight: 600;
-  color: var(--text-main);
-  margin-bottom: 10px;
-  line-height: 1.3;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
 }
 
 .product-description {
-  color: var(--text-muted);
-  font-size: 0.9rem;
-  font-weight: 300;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+  line-height: 1.5;
+  font-weight: 400;
 }
 
 .card-footer {
-  position: relative;
-  z-index: 1;
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid #F1F5F9;
 }
 
 .product-price {
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   font-weight: 700;
-  color: var(--accent-cyan);
+  color: var(--text-primary);
+  letter-spacing: -0.03em;
 }
 
-/* Buttons style */
+/* Buttons styling */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   font-family: var(--font-sans);
+  font-size: 0.9rem;
   font-weight: 500;
-  font-size: 0.95rem;
   padding: 10px 18px;
   border-radius: var(--radius-md);
   border: none;
@@ -708,14 +844,13 @@ body {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--accent-cyan) 0%, #00b4d8 100%);
-  color: #080b11;
-  box-shadow: 0 4px 14px rgba(0, 242, 254, 0.3);
+  background-color: var(--primary-color);
+  color: #FFFFFF;
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.15);
 }
 
 .btn-primary:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 242, 254, 0.45);
+  background-color: var(--primary-hover);
 }
 
 .btn-primary:disabled {
@@ -724,258 +859,244 @@ body {
 }
 
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--text-main);
+  background-color: var(--surface-color);
+  color: var(--text-primary);
   border: 1px solid var(--border-color);
 }
 
 .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.2);
+  background-color: #F8FAFC;
+  border-color: #CBD5E1;
 }
 
 .btn-add {
-  padding: 12px 24px;
-  font-size: 1rem;
+  font-weight: 600;
+  padding: 12px 20px;
+  border-radius: 24px;
+  box-shadow: 0 4px 6px rgba(37, 99, 235, 0.1);
 }
 
-.btn-details {
+.btn-link {
   background: transparent;
-  color: var(--text-muted);
+  color: var(--primary-color);
   padding: 6px 12px;
-  font-size: 0.85rem;
-  border: 1px solid transparent;
-  border-radius: 6px;
+  font-weight: 600;
+  border-radius: 20px;
 }
 
-.product-card:hover .btn-details {
-  color: var(--accent-cyan);
-  border-color: rgba(0, 242, 254, 0.2);
-  background: rgba(0, 242, 254, 0.05);
+.btn-link:hover {
+  background-color: rgba(37, 99, 235, 0.05);
+  transform: translateX(2px);
 }
 
-/* Empty State Card */
+.btn-full {
+  width: 100%;
+}
+
+/* Empty State */
 .empty-state-card {
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
+  background: var(--surface-color);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
-  padding: 60px 20px;
+  padding: 64px 32px;
   text-align: center;
-  max-width: 500px;
-  margin: 60px auto;
-  box-shadow: var(--glass-shadow);
+  max-width: 480px;
+  margin: 48px auto;
+  box-shadow: var(--shadow-sm);
 }
 
-.empty-icon-wrapper {
-  color: var(--text-muted);
-  margin-bottom: 20px;
-  opacity: 0.7;
+.empty-icon {
+  font-size: 3rem;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  user-select: none;
 }
 
 .empty-state-card h3 {
-  font-size: 1.4rem;
+  font-size: 1.25rem;
   font-weight: 600;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .empty-state-card p {
-  color: var(--text-muted);
-  font-size: 0.95rem;
+  color: var(--text-secondary);
+  font-size: 0.92rem;
   margin-bottom: 24px;
 }
 
-/* Skeletons loader */
+.empty-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+/* Skeleton Loading cards */
 .skeleton-card {
   pointer-events: none;
 }
 
 .skeleton {
-  background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+  background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
   background-size: 200% 100%;
-  animation: loading-shimmer 1.5s infinite;
-  border-radius: 4px;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeleton-image {
+  height: 180px;
+  width: 100%;
 }
 
 .skeleton-title {
-  height: 22px;
-  width: 75%;
-  margin-bottom: 15px;
+  height: 20px;
+  width: 60%;
+  margin-bottom: 12px;
+  border-radius: 4px;
 }
 
-.skeleton-text-1 {
-  height: 14px;
-  width: 100%;
-  margin-bottom: 8px;
-}
-
-.skeleton-text-2 {
+.skeleton-text {
   height: 14px;
   width: 90%;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
+  border-radius: 4px;
 }
 
 .skeleton-price {
   height: 24px;
   width: 30%;
+  margin-top: 12px;
+  border-radius: 4px;
 }
 
-.skeleton-btn {
-  height: 28px;
-  width: 40%;
-  border-radius: 6px;
-}
-
-@keyframes loading-shimmer {
+@keyframes shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
 
-/* Pagination bar style */
+/* Pagination Section */
 .pagination-section {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: auto;
-  padding-top: 30px;
+  padding-top: 24px;
   border-top: 1px solid var(--border-color);
   gap: 20px;
   flex-wrap: wrap;
 }
 
-.pagination-info {
-  font-size: 0.9rem;
-  color: var(--text-muted);
+.pagination-summary {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
 }
 
-.highlight {
-  color: var(--text-main);
-  font-weight: 500;
-}
-
-.pagination-controls {
+.pagination-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
 }
 
 .btn-pagination {
-  background: var(--glass-bg);
-  border: 1px solid var(--border-color);
-  color: var(--text-main);
-  padding: 8px 14px;
+  padding: 8px 16px;
   font-size: 0.85rem;
 }
 
-.btn-pagination:hover:not(:disabled) {
-  border-color: var(--border-hover);
-  color: var(--accent-cyan);
-}
-
 .btn-pagination:disabled {
-  opacity: 0.4;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
-.page-numbers {
+.page-indices {
   display: flex;
   gap: 6px;
 }
 
-.page-number-btn {
+.page-index-btn {
   background: transparent;
-  border: 1px solid transparent;
-  color: var(--text-muted);
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
+  border: none;
+  color: var(--text-secondary);
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
   cursor: pointer;
   font-family: var(--font-sans);
   font-weight: 500;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: var(--transition-smooth);
 }
 
-.page-number-btn:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--text-main);
+.page-index-btn:hover {
+  background-color: #F1F5F9;
+  color: var(--text-primary);
 }
 
-.page-number-btn.active {
-  background: var(--accent-cyan);
-  color: #080b11;
-  border-color: var(--accent-cyan);
+.page-index-btn.active {
+  background-color: var(--text-primary);
+  color: #FFFFFF;
 }
 
-/* Modals structures */
+/* Modals overlays & Cards */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(4, 6, 10, 0.8);
-  backdrop-filter: blur(8px);
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
   z-index: 100;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 24px;
 }
 
-.modal-content {
-  width: 100%;
-  max-width: 540px;
-  border-radius: var(--radius-lg);
+.modal-card {
+  background: var(--surface-color);
   border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  width: 100%;
+  max-width: 500px;
   overflow: hidden;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-  background: var(--bg-secondary);
   display: flex;
   flex-direction: column;
 }
 
-.glass-panel {
-  background: rgba(13, 18, 30, 0.9);
-  backdrop-filter: var(--glass-blur);
-}
-
 .modal-header {
+  padding: 24px;
+  border-bottom: 1px solid #F1F5F9;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px;
-  border-bottom: 1px solid var(--border-color);
 }
 
-.modal-header h3 {
-  font-size: 1.3rem;
-  font-weight: 600;
+.modal-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
-.close-modal-btn {
+.btn-close {
   background: transparent;
   border: none;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   cursor: pointer;
   padding: 4px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
   transition: var(--transition-smooth);
 }
 
-.close-modal-btn:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--text-main);
+.btn-close:hover {
+  background: #F1F5F9;
+  color: var(--text-primary);
 }
 
-/* Forms layout */
-.modal-form {
+.form-layout {
   padding: 24px;
 }
 
@@ -985,63 +1106,77 @@ body {
 
 .form-group label {
   display: block;
-  font-size: 0.88rem;
-  font-weight: 500;
-  color: var(--text-muted);
-  margin-bottom: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 6px;
 }
 
 .form-control {
   width: 100%;
-  background: rgba(255, 255, 255, 0.03);
+  background-color: #FAFAFA;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  color: var(--text-main);
+  color: var(--text-primary);
   font-family: var(--font-sans);
-  font-size: 0.95rem;
-  padding: 12px 16px;
+  font-size: 0.92rem;
+  padding: 12px 14px;
   outline: none;
   transition: var(--transition-smooth);
 }
 
-.form-control::placeholder {
-  color: #4b5563;
-}
-
 .form-control:focus {
-  border-color: var(--border-hover);
-  background: rgba(255, 255, 255, 0.05);
-  box-shadow: 0 0 10px rgba(0, 242, 254, 0.05);
+  background-color: var(--surface-color);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
 }
 
 .form-control.is-invalid {
-  border-color: #ef4444;
-  box-shadow: 0 0 10px rgba(239, 68, 68, 0.1);
+  border-color: #EF4444;
+  background-color: #FEF2F2;
+}
+
+.price-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.currency-prefix {
+  position: absolute;
+  left: 14px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 0.92rem;
+  pointer-events: none;
+}
+
+.input-price {
+  padding-left: 36px;
 }
 
 .text-area {
   resize: none;
 }
 
-.error-msg {
-  display: block;
+.error-text {
   font-size: 0.8rem;
-  color: #ef4444;
+  color: #EF4444;
   margin-top: 6px;
+  display: block;
 }
 
-.modal-actions {
+.form-actions {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  margin-top: 30px;
+  margin-top: 28px;
 }
 
-/* Spinner loader inside button */
 .spinner {
   width: 16px;
   height: 16px;
-  border: 2px solid rgba(0, 0, 0, 0.1);
+  border: 2px solid rgba(255,255,255,0.2);
   border-top-color: currentColor;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -1051,100 +1186,153 @@ body {
   to { transform: rotate(360deg); }
 }
 
-/* Detail modal styles */
-.detail-modal {
-  max-width: 600px;
+/* Detail Card custom grid layout */
+.detail-card {
+  max-width: 680px;
 }
 
-.detail-body {
-  padding: 30px 24px;
-}
-
-.detail-name {
-  font-size: 1.8rem;
+.modal-subtitle-tag {
+  font-size: 0.75rem;
   font-weight: 700;
-  margin-bottom: 12px;
-  line-height: 1.2;
-}
-
-.detail-price-badge {
-  display: inline-block;
-  background: rgba(0, 242, 254, 0.1);
-  border: 1px solid rgba(0, 242, 254, 0.2);
-  color: var(--accent-cyan);
-  font-size: 1.3rem;
-  font-weight: 700;
-  padding: 4px 14px;
-  border-radius: 20px;
-  margin-bottom: 30px;
-}
-
-.detail-section {
-  margin-bottom: 30px;
-}
-
-.section-label {
-  font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--text-muted);
-  margin-bottom: 10px;
-  font-weight: 600;
+  color: var(--text-secondary);
 }
 
-.detail-desc-text {
-  font-size: 1rem;
-  font-weight: 300;
-  line-height: 1.6;
-  white-space: pre-wrap;
-  color: rgba(243, 244, 246, 0.9);
-}
-
-.detail-metadata {
+.detail-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 16px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 16px;
+  padding: 0;
 }
 
-.meta-item {
+@media (min-width: 640px) {
+  .detail-grid {
+    grid-template-columns: 2fr 3fr;
+  }
+}
+
+.detail-preview-panel {
+  position: relative;
+  background-color: #0F172A;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  justify-content: center;
+  align-items: center;
+  min-height: 240px;
+  overflow: hidden;
 }
 
-.meta-label {
+.detail-preview-panel .geometric-pattern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.detail-preview-badge {
+  position: relative;
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #FFFFFF;
   font-size: 0.75rem;
-  color: var(--text-muted);
+  padding: 6px 12px;
+  border-radius: 20px;
+  backdrop-filter: blur(8px);
+}
+
+.detail-info-panel {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin-bottom: 12px;
+}
+
+.detail-price-section {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 24px;
+}
+
+.detail-price-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.detail-price-value {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.03em;
+}
+
+.detail-description-section {
+  margin-bottom: 24px;
+}
+
+.detail-description-section h4 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.detail-description-section p {
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+.detail-meta-table {
+  border-top: 1px solid #F1F5F9;
+  padding-top: 16px;
+}
+
+.meta-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  padding: 6px 0;
+}
+
+.meta-col-label {
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
-.meta-val {
-  font-size: 0.9rem;
-  color: var(--text-main);
+.meta-col-value {
+  color: var(--text-primary);
+  font-weight: 600;
 }
 
-code.meta-val {
+.font-mono {
   font-family: monospace;
-  word-break: break-all;
-  background: rgba(0,0,0,0.2);
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.85rem;
 }
 
-.detail-footer {
-  padding: 20px 24px;
-  border-top: 1px solid var(--border-color);
-  display: flex;
-  justify-content: flex-end;
+.text-success {
+  color: #10B981;
 }
 
-/* Toast alert elements */
-.toasts-wrapper {
+.modal-footer {
+  padding: 16px 24px;
+  background-color: #FAFAFA;
+  border-top: 1px solid #F1F5F9;
+}
+
+/* Toast Container (Apple-style sleek alert) */
+.toast-container {
   position: fixed;
   bottom: 24px;
   right: 24px;
@@ -1157,59 +1345,64 @@ code.meta-val {
 
 .toast-alert {
   pointer-events: auto;
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 14px 20px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  box-shadow: var(--shadow-lg);
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 16px 20px;
-  border-radius: var(--radius-md);
-  font-size: 0.92rem;
-  font-weight: 500;
-  min-width: 280px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-  backdrop-filter: var(--glass-blur);
+  gap: 10px;
+  min-width: 260px;
 }
 
-.toast-alert.success {
-  background: rgba(16, 185, 129, 0.15);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  color: #10b981;
+.toast-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
-.toast-alert.error {
-  background: rgba(239, 68, 68, 0.15);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  color: #ef4444;
+.toast-alert.success .toast-dot {
+  background-color: #10B981;
 }
 
-/* Vue Transitions */
+.toast-alert.error .toast-dot {
+  background-color: #EF4444;
+}
+
+/* Vue Animations */
 .fade-enter-active, .fade-leave-active {
-  transition: opacity 0.25s ease;
+  transition: opacity 0.2s ease;
 }
 .fade-enter-from, .fade-leave-to {
   opacity: 0;
 }
 
-.zoom-enter-active, .zoom-leave-active {
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease;
+.slide-up-enter-active, .slide-up-leave-active {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
 }
-.zoom-enter-from, .zoom-leave-to {
-  transform: scale(0.95);
+.slide-up-enter-from, .slide-up-leave-to {
+  transform: translateY(30px);
   opacity: 0;
 }
 
-.slide-enter-active, .slide-leave-active {
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+.toast-slide-enter-active, .toast-slide-leave-active {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
 }
-.slide-enter-from {
-  transform: translateY(20px);
+.toast-slide-enter-from {
+  transform: translateY(15px);
   opacity: 0;
 }
-.slide-leave-to {
+.toast-slide-leave-to {
   transform: translateX(100px);
   opacity: 0;
 }
 
-/* Mobile Responsive */
+/* Responsive Grid and elements */
 @media (max-width: 640px) {
   .app-header {
     flex-direction: column;
@@ -1218,10 +1411,15 @@ code.meta-val {
   .btn-add {
     width: 100%;
   }
+  .hero-banner {
+    padding: 32px 24px;
+  }
+  .hero-headline {
+    font-size: 1.8rem;
+  }
   .pagination-section {
     flex-direction: column;
     align-items: center;
-    text-align: center;
   }
 }
 </style>
