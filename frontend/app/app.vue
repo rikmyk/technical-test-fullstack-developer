@@ -303,8 +303,8 @@ const fetchProducts = async () => {
   } catch (err) {
     console.error(err)
     showToast('Failed to load products from API server', 'error')
-  } fill/y {
-    isLoading.value = false
+  } finally {
+    isLoading.value = false;
   }
 }
 
