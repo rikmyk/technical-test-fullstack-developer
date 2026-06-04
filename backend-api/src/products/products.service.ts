@@ -28,7 +28,7 @@ export class ProductsService {
   }
 
   async findAll(queryDto: GetProductsQueryDto) {
-    const { page, limit, search } = queryDto;
+    const { page = 1, limit = 10, search } = queryDto;
     const skip = (page - 1) * limit;
 
     const queryBuilder = this.productsRepository.createQueryBuilder('product');
