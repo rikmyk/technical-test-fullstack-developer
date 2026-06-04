@@ -21,7 +21,7 @@ class ProductForm
                     ->required()
                     ->numeric()
                     ->minValue(0)
-                    ->prefix('$'),
+                    ->prefix('Rp'),
             ]);
     }
 }
