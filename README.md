@@ -1,9 +1,9 @@
-# Aetheria Product Management Suite
+# VapeCloud Indo Product Management Suite
 
 A full-stack product management solution built as a monorepo consisting of:
 1. **Laravel 11 & Filament v5 Admin Panel** (`backend-admin/`) - Internal database administration (CRUD operations, advanced filters, security validations).
 2. **NestJS v11 REST API** (`backend-api/`) - High-performance backend API serving pagination, search, and payload validation.
-3. **Nuxt 3 Frontend** (`frontend/`) - Premium public-facing catalog with a glassmorphism design, real-time search, interactive modals, and notifications.
+3. **Nuxt 3 Frontend** (`frontend/`) - Premium public-facing catalog containing product lists, real-time search, dynamic forms, and detail modals.
 4. **PostgreSQL** - Shared database mapping the schema seamlessly across admin and public layers.
 
 ---
@@ -118,7 +118,7 @@ A full-stack product management solution built as a monorepo consisting of:
    * Click **"+ Add Product"** in the top right.
    * Input name, description, and price. Try inputting negative prices or leaving fields blank to test the client-side validations.
    * On success, a green notification will slide in, the modal will close, and the list will instantly refresh.
-5. **View Product Specs:** Click any product card or the **"View Details"** button to open the glassmorphism detailed specifications view displaying the full UUID and creation timestamps.
+5. **View Product Specs:** Click any product card or the **"View Details"** button to open the product detailed specifications view displaying the full UUID and creation timestamps.
 6. **Login to Admin Panel (Laravel Filament):**
    * Go to `http://127.0.0.1:8000/admin`.
    * Login with `admin@example.com` and `password`.
