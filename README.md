@@ -158,9 +158,4 @@ Our strategy focuses on security, low latency, and isolation:
 * **Database Firewall (`digitalocean_database_firewall`):** Restricts access so that incoming traffic to the PostgreSQL cluster is ONLY accepted from the private IP of the application server Droplet, closing all public database ports.
 * **Application Host Server (`digitalocean_droplet`):** A standard Ubuntu Droplet preinstalled with Docker and Docker Compose. A custom `user_data` bash script automatically secures the host OS on startup by installing packages and enabling `ufw` (Uncomplicated Firewall) rules (only TCP ports `22`, `80`, and `443` are open).
 * **DigitalOcean Project (`digitalocean_project`):** Dynamically groups the droplet and database under a single project for clean resource monitoring and access controls.
-
-### How to Provision Locally
-1. Navigate to the terraform directory: `cd terraform`
-2. Initialize Terraform: `terraform init`
-3. Check execution plan: `terraform plan -var="do_token=<YOUR_TOKEN>"`
-4. Apply configurations: `terraform apply -var="do_token=<YOUR_TOKEN>"`
+*Note: As per the test requirements, actual infrastructure provisioning and deployment are not required to run this application locally. The provided Terraform configurations (`terraform/main.tf`) serve as a production-ready blueprint mapping the target cloud infrastructure.*
