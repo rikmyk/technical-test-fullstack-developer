@@ -33,14 +33,14 @@ variable "droplet_size" {
 
 # VPC (Virtual Private Cloud)
 resource "digitalocean_vpc" "app_vpc" {
-  name     = "aetheria-vpc"
+  name     = "vapecloud-vpc"
   region   = var.region
   ip_range = "10.10.10.0/24"
 }
 
 # Managed PostgreSQL Database Cluster
 resource "digitalocean_database_cluster" "postgres_cluster" {
-  name       = "aetheria-postgres"
+  name       = "vapecloud-postgres"
   engine     = "pg"
   version    = "16"
   size       = "db-s-1vcpu-1gb" # Minimal tier for DB cluster
@@ -57,13 +57,13 @@ resource "digitalocean_database_db" "app_db" {
 
 # SSH Key for authentication
 resource "digitalocean_ssh_key" "default" {
-  name       = "aetheria-ssh-key"
+  name       = "vapecloud-ssh-key"
   public_key = file("~/.ssh/id_rsa.pub")
 }
 
 # Application Server (Droplet)
 resource "digitalocean_droplet" "app_server" {
-  name       = "aetheria-app-server"
+  name       = "vapecloud-app-server"
   image      = "docker-20-04" # Ubuntu image with Docker pre-installed
   region     = var.region
   size       = var.droplet_size
@@ -98,8 +98,8 @@ resource "digitalocean_database_firewall" "db_fw" {
 }
 
 # Organize resources under a unified DigitalOcean Project
-resource "digitalocean_project" "aetheria_project" {
-  name        = "Aetheria Application Suite"
+resource "digitalocean_project" "vapecloud_project" {
+  name        = "VapeCloud Indo Application Suite"
   description = "A combined fullstack system comprising Laravel, NestJS, and Nuxt 3"
   purpose     = "Web Application"
   environment = "Production"
