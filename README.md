@@ -127,19 +127,40 @@ A full-stack product management solution built as a monorepo consisting of:
 
 ---
 
-## 🚀 GitLab CI/CD Pipeline Overview
+## 🚀 GitLab CI/CD Pipeline & Deployment Guide
 
-The project includes a robust pipeline defined in `.gitlab-ci.yml` supporting:
+The project includes an automated pipeline defined in `.gitlab-ci.yml` supporting:
 * **Lint Stage:** Checks Laravel syntax (Laravel Pint), NestJS syntax (ESlint), and Nuxt compilation readiness.
-* **Build Stage:** Independently packages all projects for deployment (optimizes Autoloaders in PHP, bundles client/server artifacts in NestJS and Nuxt).
-* **Deploy Stage:** A manual production release trigger to remotely pull changes onto the DigitalOcean droplet and reboot docker-compose services via SSH keys safely.
+* **Build Stage:** Packages all projects for deployment (optimizes autoloaders in PHP, bundles client/server production artifacts in NestJS and Nuxt).
+* **Deploy Stage:** Connects remotely to the target server via SSH to pull the latest main branch and restart the application stack.
+
+### Production Deployment Steps (Execution Plan)
+To deploy this application to production, follow these steps:
+1. **Prepare credentials:** Create a Personal Access Token on DigitalOcean and generate an SSH Key pair (`id_rsa`/`id_rsa.pub`).
+2. **Provision Infrastructure:** Run Terraform (see below) to create the cloud server, network, and database.
+3. **Configure CI/CD Variables:** In your GitLab repository settings under **CI/CD > Variables**, add the following secure variables:
+   * `SSH_PRIVATE_KEY`: The contents of your private SSH key (`id_rsa`).
+   * `SSH_SERVER_IP`: The public IP address of the provisioned Droplet.
+   * `SSH_USER`: The username of the server (e.g. `root`).
+4. **Push Code:** Push your commits to the `main` branch. The GitLab runner will automatically run tests and compile the code.
+5. **Trigger Deployment:** Go to **CI/CD > Pipelines** in GitLab, and manually trigger the `deploy:production` job. The pipeline will remotely SSH into the server and run Docker Compose to bring up the updated application stack.
 
 ---
 
 ## ☁️ Infrastructure as Code (IaC) — Terraform
 
-The system infrastructure on **DigitalOcean** is fully modeled in `terraform/main.tf` mapping:
-* **VPC Network:** Private virtual network isolating droplets and databases from the open web.
-* **Managed PostgreSQL:** A single-node PostgreSQL v16 managed cluster bound to the VPC for automatic backups and database maintenance.
-* **Droplet Server:** An entry-tier Ubuntu droplet configured with Docker and Docker Compose to spin up Laravel, NestJS, and Nuxt 3 containers.
-* **Database Firewall:** Restricts access to the PostgreSQL database cluster so it only accepts incoming connections originating from the application server Droplet IP.
+The cloud infrastructure on **DigitalOcean** is modeled in `terraform/main.tf`.
+
+### Infrastructure Provisioning Strategy
+Our strategy focuses on security, low latency, and isolation:
+* **VPC Network (`digitalocean_vpc`):** Establishes an isolated private network (`10.10.10.0/24`) in the Singapore (`sgp1`) region for minimal South East Asia latency. All internal communication between the application server and the database runs through this private network.
+* **Managed Database Cluster (`digitalocean_database_cluster`):** Provisions a managed PostgreSQL 16 cluster. Using a managed service offloads database maintenance, automated security updates, backups, and failover management.
+* **Database Firewall (`digitalocean_database_firewall`):** Restricts access so that incoming traffic to the PostgreSQL cluster is ONLY accepted from the private IP of the application server Droplet, closing all public database ports.
+* **Application Host Server (`digitalocean_droplet`):** A standard Ubuntu Droplet preinstalled with Docker and Docker Compose. A custom `user_data` bash script automatically secures the host OS on startup by installing packages and enabling `ufw` (Uncomplicated Firewall) rules (only TCP ports `22`, `80`, and `443` are open).
+* **DigitalOcean Project (`digitalocean_project`):** Dynamically groups the droplet and database under a single project for clean resource monitoring and access controls.
+
+### How to Provision Locally
+1. Navigate to the terraform directory: `cd terraform`
+2. Initialize Terraform: `terraform init`
+3. Check execution plan: `terraform plan -var="do_token=<YOUR_TOKEN>"`
+4. Apply configurations: `terraform apply -var="do_token=<YOUR_TOKEN>"`
